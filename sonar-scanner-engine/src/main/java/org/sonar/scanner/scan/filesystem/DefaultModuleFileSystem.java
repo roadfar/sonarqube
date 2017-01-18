@@ -125,7 +125,6 @@ public class DefaultModuleFileSystem extends DefaultFileSystem {
     }
     initialized = true;
     indexer.index(this);
-    // TODO: index all files
   }
 
   @Override

@@ -25,11 +25,10 @@ import org.sonar.api.batch.fs.InputComponent;
  * @since 5.2
  */
 public abstract class DefaultInputComponent implements InputComponent {
-  private static int ids = 0;
   private int id;
 
-  public DefaultInputComponent() {
-    id = ids++;
+  public DefaultInputComponent(int batchId) {
+    this.id = batchId;
   }
 
   @Override

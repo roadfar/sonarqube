@@ -193,7 +193,7 @@ public class JSONReport implements Reporter {
     json
       .beginObject()
       .prop("key", module.key())
-      .prop("path", module.getPath())
+      .prop("path", moduleHierarchy.relativePath(module))
       .endObject();
     for (DefaultInputModule subModule : moduleHierarchy.children(module)) {
       writeJsonModuleComponents(json, subModule);

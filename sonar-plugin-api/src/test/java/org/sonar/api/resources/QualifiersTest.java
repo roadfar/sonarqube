@@ -62,7 +62,10 @@ public class QualifiersTest {
 
   @Test
   public void testModule() {
-    Resource sub = new Project(mock(DefaultInputModule.class), mock(InputModuleHierarchy.class));
+    DefaultInputModule module = mock(DefaultInputModule.class);
+    InputModuleHierarchy moduleHierarchy = mock(InputModuleHierarchy.class);
+    when(moduleHierarchy.parent(module)).thenReturn(mock(DefaultInputModule.class));
+    Resource sub = new Project(module, moduleHierarchy);
     assertThat(Qualifiers.isView(sub, true), is(false));
     assertThat(Qualifiers.isView(sub, false), is(false));
     assertThat(Qualifiers.isProject(sub, true), is(true));

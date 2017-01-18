@@ -29,6 +29,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.utils.PathUtils;
 
 public class TestInputFileBuilder {
+  public static int batchId = 1;
   private final String relativePath;
   private final String moduleKey;
   private Path moduleBaseDir;
@@ -112,7 +113,7 @@ public class TestInputFileBuilder {
   }
 
   public DefaultInputFile build() {
-    DefaultIndexedFile indexedFile = new DefaultIndexedFile(moduleKey, moduleBaseDir, relativePath, type);
+    DefaultIndexedFile indexedFile = new DefaultIndexedFile(moduleKey, moduleBaseDir, relativePath, type, batchId++);
     indexedFile.setLanguage(language);
     DefaultInputFile inputFile = new DefaultInputFile(indexedFile, f -> new Metadata(lines, nonBlankLines, hash, originalLineOffsets, lastValidOffset));
     inputFile.setStatus(status);

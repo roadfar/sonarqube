@@ -200,6 +200,11 @@ public class DefaultFileSystem implements FileSystem {
     cache.add(inputDir);
     return this;
   }
+  
+  public DefaultFileSystem add(InputModule inputModule) {
+    cache.add(inputModule);
+    return this;
+  }
 
   /**
    * Adds a language to the list. To be used only for unit tests that need to use {@link #languages()} without
@@ -273,7 +278,7 @@ public class DefaultFileSystem implements FileSystem {
     public InputDir inputDir(String relativePath) {
       return dirMap.get(relativePath);
     }
-    
+
     public InputModule module() {
       return module;
     }

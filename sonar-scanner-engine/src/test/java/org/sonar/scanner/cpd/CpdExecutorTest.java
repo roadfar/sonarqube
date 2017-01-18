@@ -98,10 +98,12 @@ public class CpdExecutorTest {
   }
 
   private DefaultInputFile createComponent(String relativePath, int lines) {
-    return new TestInputFileBuilder("foo", relativePath)
+    DefaultInputFile file = new TestInputFileBuilder("foo", relativePath)
       .setModuleBaseDir(baseDir.toPath())
       .setLines(lines)
       .build();
+    componentStore.put("foo", file);
+    return file;
   }
 
   @Test

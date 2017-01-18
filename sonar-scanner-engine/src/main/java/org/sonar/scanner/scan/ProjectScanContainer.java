@@ -85,6 +85,7 @@ import org.sonar.scanner.rule.DefaultActiveRulesLoader;
 import org.sonar.scanner.rule.DefaultRulesLoader;
 import org.sonar.scanner.rule.RulesLoader;
 import org.sonar.scanner.rule.RulesProvider;
+import org.sonar.scanner.scan.filesystem.BatchIdGenerator;
 import org.sonar.scanner.scan.filesystem.InputComponentStore;
 import org.sonar.scanner.scan.measure.DefaultMetricFinder;
 import org.sonar.scanner.scan.measure.DeprecatedMetricFinder;
@@ -148,6 +149,9 @@ public class ProjectScanContainer extends ComponentContainer {
       // file system
       InputComponentStore.class,
       PathResolver.class,
+      DefaultInputModuleHierarchy.class,
+      DefaultComponentTree.class,
+      BatchIdGenerator.class,
 
       // rules
       new ActiveRulesProvider(),

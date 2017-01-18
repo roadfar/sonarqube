@@ -17,25 +17,40 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonar.api.batch.fs.internal;
+package org.sonar.scanner.util;
 
-import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.annotation.CheckForNull;
 
-import org.sonar.api.batch.fs.InputModule;
-import org.sonar.api.batch.fs.internal.DefaultInputModule;
+public class TreeNode<T> {
+  private T t;
+  private T parent;
+  private List<T> children = new LinkedList<>();
 
-public interface InputModuleHierarchy {
-  DefaultInputModule root();
-  
-  boolean isRoot(InputModule module);
+  public TreeNode(T t) {
+    this.t = t;
+  }
 
-  Collection<DefaultInputModule> children(InputModule module);
+  public T value() {
+    return t;
+  }
 
   @CheckForNull
-  DefaultInputModule parent(InputModule module);
-  
-  @CheckForNull
-  String relativePath(InputModule module);
+  public T parent() {
+    return parent;
+  }
+
+  public List<T> children() {
+    return children;
+  }
+
+  public void addChild(T child) {
+    this.children.add(child);
+  }
+
+  public void setParent(T parent) {
+    this.parent = parent;
+  }
 }

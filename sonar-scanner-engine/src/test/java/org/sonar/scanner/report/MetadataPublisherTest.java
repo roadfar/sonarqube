@@ -29,6 +29,7 @@ import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.fs.internal.DefaultInputModule;
 import org.sonar.api.batch.fs.internal.InputModuleHierarchy;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.config.Settings;
 import org.sonar.api.config.MapSettings;
 import org.sonar.scanner.ProjectAnalysisInfo;
@@ -60,7 +61,7 @@ public class MetadataPublisherTest {
   @Before
   public void prepare() {
     projectDef = ProjectDefinition.create().setKey("foo");
-    rootModule = new DefaultInputModule(projectDef);
+    rootModule = new DefaultInputModule(projectDef, TestInputFileBuilder.batchId++);
     projectAnalysisInfo = mock(ProjectAnalysisInfo.class);
     when(projectAnalysisInfo.analysisDate()).thenReturn(new Date(1234567L));
     inputModuleHierarchy = mock(InputModuleHierarchy.class);

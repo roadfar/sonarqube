@@ -66,7 +66,7 @@ public class CpdExecutor {
 
   private final SonarCpdBlockIndex index;
   private final ReportPublisher publisher;
-  private final InputComponentStore inputComponentCache;
+  private final InputComponentStore componentStore;
   private final Settings settings;
   private final ProgressReport progressReport;
   private int count;
@@ -76,7 +76,7 @@ public class CpdExecutor {
     this.settings = settings;
     this.index = index;
     this.publisher = publisher;
-    this.inputComponentCache = inputComponentCache;
+    this.componentStore = inputComponentCache;
     this.progressReport = new ProgressReport("CPD computation", TimeUnit.SECONDS.toMillis(10));
   }
 
@@ -108,7 +108,7 @@ public class CpdExecutor {
 
   @VisibleForTesting
   void runCpdAnalysis(ExecutorService executorService, String componentKey, final Collection<Block> fileBlocks, long timeout) {
-    DefaultInputComponent component = (DefaultInputComponent) inputComponentCache.getByKey(componentKey);
+    DefaultInputComponent component = (DefaultInputComponent) componentStore.getByKey(componentKey);
     if (component == null) {
       LOG.error("Resource not found in component cache: {}. Skipping CPD computation for it", componentKey);
       return;
@@ -200,7 +200,7 @@ public class CpdExecutor {
         blockBuilder.clear();
         String componentKey = duplicate.getResourceId();
         if (!component.key().equals(componentKey)) {
-          DefaultInputComponent sameProjectComponent = (DefaultInputComponent) inputComponentCache.getByKey(componentKey);
+          DefaultInputComponent sameProjectComponent = (DefaultInputComponent) componentStore.getByKey(componentKey);
           blockBuilder.setOtherFileRef(sameProjectComponent.batchId());
         }
         dupBuilder.addDuplicate(blockBuilder

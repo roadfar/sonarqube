@@ -20,6 +20,8 @@
 package org.sonar.scanner.issue.tracking;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,12 +37,12 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Status;
 import org.sonar.api.batch.fs.InputModule;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.fs.internal.InputComponentTree;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.core.issue.tracking.Input;
 import org.sonar.core.issue.tracking.Tracker;
 import org.sonar.core.issue.tracking.Tracking;
-import org.sonar.scanner.DefaultComponentTree;
 import org.sonar.scanner.analysis.DefaultAnalysisMode;
 import org.sonar.scanner.issue.IssueTransformer;
 import org.sonar.scanner.protocol.output.ScannerReport;
@@ -53,15 +55,15 @@ public class LocalIssueTracking {
   private final ActiveRules activeRules;
   private final ServerIssueRepository serverIssueRepository;
   private final DefaultAnalysisMode mode;
-  private final DefaultComponentTree moduleTree;
+  private final InputComponentTree componentTree;
 
   private boolean hasServerAnalysis;
 
-  public LocalIssueTracking(Tracker<TrackedIssue, ServerIssueFromWs> tracker, ServerLineHashesLoader lastLineHashes, DefaultComponentTree moduleTree,
+  public LocalIssueTracking(Tracker<TrackedIssue, ServerIssueFromWs> tracker, ServerLineHashesLoader lastLineHashes, InputComponentTree componentTree,
     ActiveRules activeRules, ServerIssueRepository serverIssueRepository, ProjectRepositories projectRepositories, DefaultAnalysisMode mode) {
     this.tracker = tracker;
     this.lastLineHashes = lastLineHashes;
-    this.moduleTree = moduleTree;
+    this.componentTree = componentTree;
     this.serverIssueRepository = serverIssueRepository;
     this.mode = mode;
     this.activeRules = activeRules;
@@ -74,19 +76,19 @@ public class LocalIssueTracking {
     }
   }
 
-  public List<TrackedIssue> trackIssues(InputModule inputModule, Collection<ScannerReport.Issue> reportIssues, Date analysisDate) {
+  public List<TrackedIssue> trackIssues(InputComponent component, Collection<ScannerReport.Issue> reportIssues, Date analysisDate) {
     List<TrackedIssue> trackedIssues = new LinkedList<>();
     if (hasServerAnalysis) {
       // all the issues that are not closed in db before starting this module scan, including manual issues
-      Collection<ServerIssueFromWs> serverIssues = loadServerIssues(inputModule);
+      Collection<ServerIssueFromWs> serverIssues = loadServerIssues(component);
 
-      if (shouldCopyServerIssues(inputModule)) {
+      if (shouldCopyServerIssues(component)) {
         // raw issues should be empty, we just need to deal with server issues (SONAR-6931)
         copyServerIssues(serverIssues, trackedIssues);
       } else {
 
-        SourceHashHolder sourceHashHolder = loadSourceHashes(inputModule);
-        Collection<TrackedIssue> rIssues = IssueTransformer.toTrackedIssue(inputModule, reportIssues, sourceHashHolder);
+        SourceHashHolder sourceHashHolder = loadSourceHashes(component);
+        Collection<TrackedIssue> rIssues = IssueTransformer.toTrackedIssue(component, reportIssues, sourceHashHolder);
 
         Input<ServerIssueFromWs> baseIssues = createBaseInput(serverIssues, sourceHashHolder);
         Input<TrackedIssue> rawIssues = createRawInput(rIssues, sourceHashHolder);
@@ -99,7 +101,8 @@ public class LocalIssueTracking {
       }
     }
 
-    if (hasServerAnalysis && moduleTree.root().equals(inputModule)) {
+    if (hasServerAnalysis && componentTree.getParent(component) == null) {
+      Preconditions.checkState(component instanceof InputModule, "Object without parent is of type: " + component.getClass());
       // issues that relate to deleted components
       addIssuesOnDeletedComponents(trackedIssues);
     }

@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.fs.internal.DefaultInputModule;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.measure.internal.DefaultMeasure;
@@ -49,12 +50,14 @@ public class CoveragePublisherTest {
   private CoveragePublisher publisher;
 
   private InputComponentStore componentCache;
+  private DefaultInputFile inputFile;
 
   @Before
   public void prepare() {
+    inputFile = new TestInputFileBuilder("foo", "src/Foo.php").setLines(5).build();
     componentCache = new InputComponentStore();
     componentCache.put("foo", new DefaultInputModule("foo"));
-    componentCache.put("foo", new TestInputFileBuilder("foo", "src/Foo.php").setLines(5).build());
+    componentCache.put("foo", inputFile);
 
     measureCache = mock(MeasureCache.class);
     when(measureCache.byMetric(anyString(), anyString())).thenReturn(null);
@@ -78,7 +81,7 @@ public class CoveragePublisherTest {
 
     publisher.publish(writer);
 
-    try (CloseableIterator<LineCoverage> it = new ScannerReportReader(outputDir).readComponentCoverage(2)) {
+    try (CloseableIterator<LineCoverage> it = new ScannerReportReader(outputDir).readComponentCoverage(inputFile.batchId())) {
       assertThat(it.next()).isEqualTo(LineCoverage.newBuilder()
         .setLine(2)
         .setHits(true)

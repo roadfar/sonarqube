@@ -52,6 +52,7 @@ import org.sonar.api.batch.events.SensorsPhaseHandler;
 import org.sonar.api.batch.events.SensorsPhaseHandler.SensorsPhaseEvent;
 import org.sonar.api.batch.fs.internal.DefaultInputModule;
 import org.sonar.api.batch.fs.internal.InputModuleHierarchy;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.resources.Project;
 import org.sonar.api.utils.System2;
 import org.sonar.scanner.bootstrap.GlobalProperties;
@@ -142,7 +143,7 @@ public class PhasesSumUpTimeProfilerTest {
   }
 
   private Project mockProject(String name, boolean isRoot) {
-    DefaultInputModule module = new DefaultInputModule(ProjectDefinition.create().setName(name).setKey(name));
+    DefaultInputModule module = new DefaultInputModule(ProjectDefinition.create().setName(name).setKey(name), TestInputFileBuilder.batchId++);
     final Project project = new Project(module, hierarchy);
     when(hierarchy.isRoot(module)).thenReturn(true);
     return project;

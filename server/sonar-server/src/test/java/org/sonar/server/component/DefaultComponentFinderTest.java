@@ -20,6 +20,9 @@
 package org.sonar.server.component;
 
 import org.junit.Test;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
+import org.sonar.api.batch.fs.internal.DefaultInputModule;
+import org.sonar.api.batch.fs.internal.InputModuleHierarchy;
 import org.sonar.api.component.Component;
 import org.sonar.api.resources.Project;
 
@@ -28,6 +31,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class DefaultComponentFinderTest {
 
@@ -38,8 +42,7 @@ public class DefaultComponentFinderTest {
     List<Component> components = newArrayList(
       createProject("org.codehaus.sonar", "Sonar"),
       createProject("org.apache.tika:tika", "Apache Tika"),
-      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent")
-    );
+      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent"));
 
     ComponentQuery query = ComponentQuery.builder().build();
     DefaultComponentQueryResult results = finder.find(query, components);
@@ -56,8 +59,7 @@ public class DefaultComponentFinderTest {
     List<Component> components = newArrayList(
       createProject("org.codehaus.sonar", "Sonar"),
       createProject("org.apache.tika:tika", "Apache Tika"),
-      createProject("org.apache.jackrabbit:jackrabbit", "Apache Jackrabbit")
-    );
+      createProject("org.apache.jackrabbit:jackrabbit", "Apache Jackrabbit"));
 
     ComponentQuery query = ComponentQuery.builder().keys(newArrayList("org.apache")).build();
     assertThat(finder.find(query, components).components()).hasSize(2);
@@ -68,8 +70,7 @@ public class DefaultComponentFinderTest {
     List<Component> components = newArrayList(
       createProject("org.codehaus.sonar", "Sonar"),
       createProject("org.apache.tika:tika", "Apache Tika"),
-      createProject("org.apache.jackrabbit:jackrabbit", "Apache Jackrabbit")
-    );
+      createProject("org.apache.jackrabbit:jackrabbit", "Apache Jackrabbit"));
 
     ComponentQuery query = ComponentQuery.builder().names(newArrayList("Apache")).build();
     assertThat(finder.find(query, components).components()).hasSize(2);
@@ -80,8 +81,7 @@ public class DefaultComponentFinderTest {
     List<Component> components = newArrayList(
       createProject("org.codehaus.sonar", "Sonar"),
       createProject("org.apache.tika:tika", "Apache Tika"),
-      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent")
-    );
+      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent"));
 
     ComponentQuery query = ComponentQuery.builder().build();
     DefaultComponentQueryResult results = finder.find(query, components);
@@ -100,8 +100,7 @@ public class DefaultComponentFinderTest {
     List<Component> components = newArrayList(
       createProject("org.codehaus.sonar", "Sonar"),
       createProject("org.apache.tika:tika", "Apache Tika"),
-      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent")
-    );
+      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent"));
 
     DefaultComponentQueryResult results = finder.find(query, components);
     assertThat(results.paging().offset()).isEqualTo(0);
@@ -117,8 +116,7 @@ public class DefaultComponentFinderTest {
     List<Component> components = newArrayList(
       createProject("org.codehaus.sonar", "Sonar"),
       createProject("org.apache.tika:tika", "Apache Tika"),
-      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent")
-    );
+      createProject("org.picocontainer:picocontainer-parent", "PicoContainer Parent"));
 
     DefaultComponentQueryResult results = finder.find(query, components);
     assertThat(results.paging()).isNull();
@@ -126,7 +124,7 @@ public class DefaultComponentFinderTest {
   }
 
   private Component createProject(String key, String name) {
-    return new Project(key, null, name);
+    return new Project(new DefaultInputModule(ProjectDefinition.create().setKey(key).setName(name), 0), mock(InputModuleHierarchy.class));
   }
 
 }

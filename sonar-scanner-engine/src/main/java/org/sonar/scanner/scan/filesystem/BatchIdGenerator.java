@@ -17,25 +17,15 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonar.api.batch.fs.internal;
+package org.sonar.scanner.scan.filesystem;
 
-import java.util.Collection;
+import java.util.function.Supplier;
 
-import javax.annotation.CheckForNull;
+public class BatchIdGenerator implements Supplier<Integer> {
+  private int nextBatchId = 1;
 
-import org.sonar.api.batch.fs.InputModule;
-import org.sonar.api.batch.fs.internal.DefaultInputModule;
-
-public interface InputModuleHierarchy {
-  DefaultInputModule root();
-  
-  boolean isRoot(InputModule module);
-
-  Collection<DefaultInputModule> children(InputModule module);
-
-  @CheckForNull
-  DefaultInputModule parent(InputModule module);
-  
-  @CheckForNull
-  String relativePath(InputModule module);
+  @Override
+  public Integer get() {
+    return nextBatchId++;
+  }
 }

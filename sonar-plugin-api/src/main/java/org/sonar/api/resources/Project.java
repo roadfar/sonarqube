@@ -89,7 +89,7 @@ public class Project extends Resource implements Component {
 
   @Override
   public String qualifier() {
-    return module.equals(moduleHierarchy.root()) ? Qualifiers.PROJECT : Qualifiers.MODULE;
+    return getParent() == null ? Qualifiers.PROJECT : Qualifiers.MODULE;
   }
 
   @Override

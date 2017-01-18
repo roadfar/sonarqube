@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.rule.internal.RulesBuilder;
@@ -63,7 +63,7 @@ public class ModuleIssuesTest {
 
   ModuleIssues moduleIssues;
 
-  InputFile file = new TestInputFileBuilder("foo", "src/Foo.php").initMetadata("Foo\nBar\nBiz\n").build();
+  DefaultInputFile file = new TestInputFileBuilder("foo", "src/Foo.php").initMetadata("Foo\nBar\nBiz\n").build();
   ReportPublisher reportPublisher = mock(ReportPublisher.class, RETURNS_DEEP_STUBS);
 
   @Test
@@ -144,7 +144,7 @@ public class ModuleIssuesTest {
 
     assertThat(added).isTrue();
     ArgumentCaptor<ScannerReport.Issue> argument = ArgumentCaptor.forClass(ScannerReport.Issue.class);
-    verify(reportPublisher.getWriter()).appendComponentIssue(eq(1), argument.capture());
+    verify(reportPublisher.getWriter()).appendComponentIssue(eq(file.batchId()), argument.capture());
     assertThat(argument.getValue().getSeverity()).isEqualTo(org.sonar.scanner.protocol.Constants.Severity.CRITICAL);
   }
 
@@ -161,7 +161,7 @@ public class ModuleIssuesTest {
     moduleIssues.initAndAddIssue(issue);
 
     ArgumentCaptor<ScannerReport.Issue> argument = ArgumentCaptor.forClass(ScannerReport.Issue.class);
-    verify(reportPublisher.getWriter()).appendComponentIssue(eq(1), argument.capture());
+    verify(reportPublisher.getWriter()).appendComponentIssue(eq(file.batchId()), argument.capture());
     assertThat(argument.getValue().getSeverity()).isEqualTo(org.sonar.scanner.protocol.Constants.Severity.INFO);
   }
 
@@ -180,7 +180,7 @@ public class ModuleIssuesTest {
 
     assertThat(added).isTrue();
     ArgumentCaptor<ScannerReport.Issue> argument = ArgumentCaptor.forClass(ScannerReport.Issue.class);
-    verify(reportPublisher.getWriter()).appendComponentIssue(eq(1), argument.capture());
+    verify(reportPublisher.getWriter()).appendComponentIssue(eq(file.batchId()), argument.capture());
     assertThat(argument.getValue().getMsg()).isEqualTo("Avoid Cycle");
   }
 

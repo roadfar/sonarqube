@@ -27,14 +27,15 @@ import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputModule;
+import org.sonar.api.batch.fs.InputPath;
 import org.sonar.api.batch.fs.internal.DefaultInputComponent;
 import org.sonar.api.batch.fs.internal.DefaultInputModule;
 import org.sonar.api.batch.fs.internal.InputComponentTree;
+import org.sonar.api.batch.fs.internal.InputModuleHierarchy;
 import org.sonar.scanner.protocol.output.ScannerReport;
 import org.sonar.scanner.protocol.output.ScannerReport.Component.ComponentType;
 import org.sonar.scanner.protocol.output.ScannerReport.ComponentLink;
 import org.sonar.scanner.protocol.output.ScannerReport.ComponentLink.ComponentLinkType;
-import org.sonar.scanner.scan.ImmutableProjectReactor;
 import org.sonar.scanner.protocol.output.ScannerReportWriter;
 
 /**
@@ -42,17 +43,17 @@ import org.sonar.scanner.protocol.output.ScannerReportWriter;
  */
 public class ComponentsPublisher implements ReportPublisherStep {
 
-  private final ImmutableProjectReactor reactor;
   private InputComponentTree componentTree;
+  private InputModuleHierarchy moduleHierarchy;
 
-  public ComponentsPublisher(ImmutableProjectReactor reactor, InputComponentTree inputComponentTree) {
-    this.reactor = reactor;
+  public ComponentsPublisher(InputModuleHierarchy moduleHierarchy, InputComponentTree inputComponentTree) {
+    this.moduleHierarchy = moduleHierarchy;
     this.componentTree = inputComponentTree;
   }
 
   @Override
   public void publish(ScannerReportWriter writer) {
-    recursiveWriteComponent((DefaultInputComponent) componentTree.root(), writer);
+    recursiveWriteComponent((DefaultInputComponent) moduleHierarchy.root(), writer);
   }
 
   private void recursiveWriteComponent(DefaultInputComponent component, ScannerReportWriter writer) {
@@ -66,7 +67,7 @@ public class ComponentsPublisher implements ReportPublisherStep {
     if (component instanceof InputModule) {
       DefaultInputModule inputModule = (DefaultInputModule) component;
       // Here we want key without branch
-      ProjectDefinition def = reactor.getProjectDefinition(component.key());
+      ProjectDefinition def = inputModule.definition();
       builder.setKey(def.getKey());
 
       // protocol buffers does not accept null values
@@ -93,7 +94,7 @@ public class ComponentsPublisher implements ReportPublisherStep {
       }
     }
 
-    String path = component.getPath();
+    String path = getPath(component);
     if (path != null) {
       builder.setPath(path);
     }
@@ -117,6 +118,22 @@ public class ComponentsPublisher implements ReportPublisherStep {
     }
   }
 
+  @CheckForNull
+  private String getPath(InputComponent component) {
+    if (component instanceof InputPath) {
+      InputPath inputPath = (InputPath) component;
+      if (StringUtils.isEmpty(inputPath.relativePath())) {
+        return "/";
+      } else {
+        return inputPath.relativePath();
+      }
+    } else if (component instanceof InputModule) {
+      InputModule module = (InputModule) component;
+      return moduleHierarchy.relativePath(module);
+    }
+    throw new IllegalStateException("Unkown component: " + component.getClass());
+  }
+
   private static String getVersion(ProjectDefinition def) {
     String version = def.getOriginalVersion();
     if (StringUtils.isNotBlank(version)) {
@@ -128,7 +145,8 @@ public class ComponentsPublisher implements ReportPublisherStep {
 
   private void writeLinks(InputComponent c, ScannerReport.Component.Builder builder) {
     if (c instanceof InputModule) {
-      ProjectDefinition def = reactor.getProjectDefinition(c.key());
+      DefaultInputModule inputModule = (DefaultInputModule) c;
+      ProjectDefinition def = inputModule.definition();
       ComponentLink.Builder linkBuilder = ComponentLink.newBuilder();
 
       writeProjectLink(builder, def, linkBuilder, CoreProperties.LINKS_HOME_PAGE, ComponentLinkType.HOME);
@@ -157,7 +175,7 @@ public class ComponentsPublisher implements ReportPublisherStep {
 
   @CheckForNull
   private static String getName(DefaultInputModule module) {
-    return module.definition().getName();
+    return module.definition().getOriginalName();
   }
 
   @CheckForNull
@@ -170,7 +188,7 @@ public class ComponentsPublisher implements ReportPublisherStep {
       return ComponentType.FILE;
     } else if (r instanceof InputDir) {
       return ComponentType.DIRECTORY;
-    } else if ((r instanceof InputModule) && r.equals(componentTree.root())) {
+    } else if ((r instanceof InputModule) && moduleHierarchy.isRoot((InputModule) r)) {
       return ComponentType.PROJECT;
     } else if (r instanceof InputModule) {
       return ComponentType.MODULE;
