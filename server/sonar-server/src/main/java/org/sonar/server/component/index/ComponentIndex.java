@@ -36,6 +36,7 @@ import org.sonar.server.es.EsClient;
 import org.sonar.server.user.UserSession;
 
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.fuzzyQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
@@ -83,7 +84,7 @@ public class ComponentIndex extends BaseIndex {
     String truncatedQuery = StringUtils.left(query.getQuery(), DefaultIndexSettings.MAXIMUM_NGRAM_LENGTH);
 
     return esQuery.must(boolQuery()
-      .should(matchQuery(FIELD_NAME + "." + SEARCH_PARTIAL_SUFFIX, truncatedQuery))
+      .should(fuzzyQuery(FIELD_NAME + "." + SEARCH_PARTIAL_SUFFIX, truncatedQuery))
       .should(matchQuery(FIELD_KEY + "." + SORT_SUFFIX, query.getQuery()).boost(3f)));
   }
 
