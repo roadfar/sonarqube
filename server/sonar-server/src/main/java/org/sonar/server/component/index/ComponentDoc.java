@@ -25,7 +25,7 @@ import org.sonar.server.es.BaseDoc;
 public class ComponentDoc extends BaseDoc {
 
   public ComponentDoc() {
-    super(new HashMap<>(5));
+    super(new HashMap<>(6));
   }
 
   @Override
@@ -72,6 +72,15 @@ public class ComponentDoc extends BaseDoc {
 
   public ComponentDoc setName(String s) {
     setField(ComponentIndexDefinition.FIELD_NAME, s);
+    return this;
+  }
+
+  public String getNameCamelized() {
+    return getField(ComponentIndexDefinition.FIELD_NAME_CAMELIZED);
+  }
+
+  public ComponentDoc setNameCamelized(String s) {
+    setField(ComponentIndexDefinition.FIELD_NAME_CAMELIZED, s);
     return this;
   }
 

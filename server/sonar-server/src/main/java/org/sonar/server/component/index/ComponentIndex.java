@@ -43,6 +43,7 @@ import static org.sonar.server.component.index.ComponentIndexDefinition.FIELD_AU
 import static org.sonar.server.component.index.ComponentIndexDefinition.FIELD_AUTHORIZATION_USERS;
 import static org.sonar.server.component.index.ComponentIndexDefinition.FIELD_KEY;
 import static org.sonar.server.component.index.ComponentIndexDefinition.FIELD_NAME;
+import static org.sonar.server.component.index.ComponentIndexDefinition.FIELD_NAME_CAMELIZED;
 import static org.sonar.server.component.index.ComponentIndexDefinition.FIELD_QUALIFIER;
 import static org.sonar.server.component.index.ComponentIndexDefinition.INDEX_COMPONENTS;
 import static org.sonar.server.component.index.ComponentIndexDefinition.TYPE_AUTHORIZATION;
@@ -78,13 +79,16 @@ public class ComponentIndex extends BaseIndex {
 
     query.getQualifier().ifPresent(q -> esQuery.filter(termQuery(FIELD_QUALIFIER, q)));
 
+    String queryText = query.getQuery();
+
     // We will truncate the search to the maximum length of nGrams in the index.
     // Otherwise the search would for sure not find any results.
-    String truncatedQuery = StringUtils.left(query.getQuery(), DefaultIndexSettings.MAXIMUM_NGRAM_LENGTH);
+    String truncatedQuery = StringUtils.left(queryText, DefaultIndexSettings.MAXIMUM_NGRAM_LENGTH);
 
     return esQuery.must(boolQuery()
       .should(matchQuery(FIELD_NAME + "." + SEARCH_PARTIAL_SUFFIX, truncatedQuery))
-      .should(matchQuery(FIELD_KEY + "." + SORT_SUFFIX, query.getQuery()).boost(3f)));
+      .should(matchQuery(FIELD_NAME_CAMELIZED + "." + SEARCH_WORDS_SUFFIX, queryText))
+      .should(matchQuery(FIELD_KEY + "." + SORT_SUFFIX, queryText).boost(3f)));
   }
 
   private QueryBuilder createAuthorizationFilter() {

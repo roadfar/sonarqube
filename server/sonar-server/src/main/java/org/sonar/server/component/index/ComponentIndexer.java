@@ -22,12 +22,15 @@ package org.sonar.server.component.index;
 
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.elasticsearch.action.index.IndexRequest;
 import org.sonar.api.Startable;
 import org.sonar.db.DbClient;
@@ -137,9 +140,67 @@ public class ComponentIndexer implements Startable {
     return new ComponentDoc()
       .setId(component.uuid())
       .setName(component.name())
+      .setNameCamelized(camelize(component.name()))
       .setKey(component.key())
       .setProjectUuid(component.projectUuid())
       .setQualifier(component.qualifier());
+  }
+
+  public static String camelize(String s) {
+    char[] chars = s.toCharArray();
+    if (Character.isLowerCase(chars[0])) {
+      return "";
+    }
+
+    List<String> terms = new ArrayList<>();
+    List<String> termsPreviousWord = new ArrayList<>();
+    List<String> edgeNGramsCurrentWord = new ArrayList<>();
+
+    String last = "" + chars[0];
+    edgeNGramsCurrentWord.add(last);
+
+    for (int i = 1; i < chars.length; i++) {
+      char c = chars[i];
+      if (Character.isLowerCase(c)) {
+        last += c;
+        edgeNGramsCurrentWord.add(last);
+      } else {
+        last = "" + c;
+
+        terms.addAll(termsPreviousWord);
+        if (termsPreviousWord.isEmpty()) {
+          termsPreviousWord = new ArrayList<>(edgeNGramsCurrentWord);
+        } else {
+          List<String> termsCurrentWord = new ArrayList<>();
+          for (String termPreviousWord : termsPreviousWord) {
+            for (String edgeNGram : edgeNGramsCurrentWord) {
+              termsCurrentWord.add(termPreviousWord + edgeNGram);
+            }
+          }
+          termsPreviousWord = termsCurrentWord;
+        }
+
+        edgeNGramsCurrentWord.clear();
+        edgeNGramsCurrentWord.add("" + c);
+      }
+    }
+
+    terms.addAll(termsPreviousWord);
+    if (termsPreviousWord.isEmpty()) {
+      termsPreviousWord = new ArrayList<>(edgeNGramsCurrentWord);
+    } else {
+      List<String> termsCurrentWord = new ArrayList<>();
+      for (String termPreviousWord : termsPreviousWord) {
+        for (String edgeNGram : edgeNGramsCurrentWord) {
+          termsCurrentWord.add(termPreviousWord + edgeNGram);
+        }
+      }
+      termsPreviousWord = termsCurrentWord;
+    }
+
+    terms.addAll(termsPreviousWord);
+
+    return terms.stream().collect(Collectors.joining(" "));
   }
 
   @Override

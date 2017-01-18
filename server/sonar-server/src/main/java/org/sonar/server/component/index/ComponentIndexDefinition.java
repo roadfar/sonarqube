@@ -32,6 +32,7 @@ public class ComponentIndexDefinition implements IndexDefinition {
   public static final String FIELD_PROJECT_UUID = "project_uuid";
   public static final String FIELD_KEY = "key";
   public static final String FIELD_NAME = "name";
+  public static final String FIELD_NAME_CAMELIZED = "nameCamelized";
   public static final String FIELD_QUALIFIER = "qualifier";
 
   public static final String TYPE_AUTHORIZATION = "authorization";
@@ -60,6 +61,7 @@ public class ComponentIndexDefinition implements IndexDefinition {
     mapping.stringFieldBuilder(FIELD_PROJECT_UUID).build();
     mapping.stringFieldBuilder(FIELD_KEY).enableSorting().build();
     mapping.stringFieldBuilder(FIELD_NAME).enableGramSearch().build();
+    mapping.stringFieldBuilder(FIELD_NAME_CAMELIZED).enableWordSearch().build();
     mapping.stringFieldBuilder(FIELD_QUALIFIER).build();
 
     // do not store document but only indexation of information

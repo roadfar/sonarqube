@@ -242,6 +242,13 @@ public class ComponentIndexTest {
   }
 
   @Test
+  public void should_support_camel_case() {
+    ComponentDto project = indexProject("theKey", "SonarLintExtraArguments");
+
+    assertSearchResults("SLEA", project);
+  }
+
+  @Test
   public void should_respect_confidentiallity() {
     indexer.index(newProject("sonarqube", "Quality Product"));
 
