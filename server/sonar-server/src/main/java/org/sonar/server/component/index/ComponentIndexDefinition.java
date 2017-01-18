@@ -59,7 +59,7 @@ public class ComponentIndexDefinition implements IndexDefinition {
     mapping.setAttribute("_routing", ImmutableMap.of("required", "true"));
     mapping.stringFieldBuilder(FIELD_PROJECT_UUID).build();
     mapping.stringFieldBuilder(FIELD_KEY).enableSorting().build();
-    mapping.stringFieldBuilder(FIELD_NAME).enableGramSearch().build();
+    mapping.stringFieldBuilder(FIELD_NAME).enableGramSearch().enableFuzzySearch().build();
     mapping.stringFieldBuilder(FIELD_QUALIFIER).build();
 
     // do not store document but only indexation of information

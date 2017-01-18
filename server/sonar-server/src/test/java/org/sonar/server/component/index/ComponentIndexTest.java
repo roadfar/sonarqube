@@ -131,7 +131,7 @@ public class ComponentIndexTest {
     assertSearchResults("struts", project, file1);
     assertSearchResults("Struts", project, file1);
     assertSearchResults("StrutsManager", file1);
-    assertSearchResults("STRUTSMA", file1);
+    assertSearchResults("STRUTSMAN", file1);
     assertSearchResults("utsManag", file1);
   }
 
@@ -145,8 +145,6 @@ public class ComponentIndexTest {
     assertSearchResults("manager.java", file1);
 
     // do not match
-    assertNoSearchResults("strutsmanager.txt");
-    assertNoSearchResults("strutsmanagerjava");
     assertNoSearchResults("somethingStrutsManager.java");
   }
 
@@ -242,15 +240,22 @@ public class ComponentIndexTest {
   }
 
   @Test
-  public void should_ignore_single_missing_characters() {
+  public void should_find_item_despite_missing_character() {
     ComponentDto project = indexProject("key-1", "SonarQube");
 
-    assertSearchResults("sonqube", project);
+    assertSearchResults("SonrQube", project);
   }
 
   @Test
-  public void should_ignore_single_missing_characters_in_subterms() {
-    ComponentDto project = indexProject("key-1", "TheSonarQubeGuide");
+  public void should_find_item_despite_missing_character_and_lowercase() {
+    ComponentDto project = indexProject("key-1", "SonarQube");
+
+    assertSearchResults("sonrqube", project);
+  }
+
+  @Test
+  public void should_find_item_despite_two_missing_characters_and_lowercase() {
+    ComponentDto project = indexProject("key-1", "SonarQube");
 
     assertSearchResults("sonqube", project);
   }

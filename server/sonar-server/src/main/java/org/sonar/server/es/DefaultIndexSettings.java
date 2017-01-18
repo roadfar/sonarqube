@@ -27,6 +27,14 @@ public class DefaultIndexSettings {
   /** Maximum length of ngrams. */
   public static final int MAXIMUM_NGRAM_LENGTH = 15;
 
+  public static final String ANALYZER_INDEX_FUZZY = "index_fuzzy";
+  public static final String ANALYZER_SEARCH_FUZZY = "search_fuzzy";
+
+  private static final String ANALYZER = "index.analysis.analyzer.";
+  private static final String TYPE = ".type";
+  private static final String TOKENIZER = ".tokenizer";
+  private static final String FILTER = ".filter";
+
   private DefaultIndexSettings() {
     // only static stuff
   }
@@ -98,7 +106,24 @@ public class DefaultIndexSettings {
       .put("index.analysis.tokenizer.dot_tokenizer.pattern", "\\.")
       .put("index.analysis.analyzer.uuid_analyzer.type", "custom")
       .putArray("index.analysis.analyzer.uuid_analyzer.filter", "trim")
-      .put("index.analysis.analyzer.uuid_analyzer.tokenizer", "dot_tokenizer");
+      .put("index.analysis.analyzer.uuid_analyzer.tokenizer", "dot_tokenizer")
 
+      .put(fuzzy());
+  }
+
+  private static Settings fuzzy() {
+    return Settings.builder()
+
+      // Fuzzy index-analyzer
+      .put(ANALYZER + ANALYZER_INDEX_FUZZY + TYPE, "custom")
+      .put(ANALYZER + ANALYZER_INDEX_FUZZY + TOKENIZER, "whitespace")
+      .putArray(ANALYZER + ANALYZER_INDEX_FUZZY + FILTER, "trim", "lowercase")
+
+      // Fuzzy search-analyzer
+      .put(ANALYZER + ANALYZER_SEARCH_FUZZY + TYPE, "custom")
+      .put(ANALYZER + ANALYZER_SEARCH_FUZZY + TOKENIZER, "whitespace")
+      .putArray(ANALYZER + ANALYZER_SEARCH_FUZZY + FILTER, "trim", "lowercase")
+
+      .build();
   }
 }

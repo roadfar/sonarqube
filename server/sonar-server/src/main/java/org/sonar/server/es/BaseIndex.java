@@ -29,6 +29,7 @@ public abstract class BaseIndex {
   public static final String SORT_SUFFIX = "sort";
   public static final String SEARCH_WORDS_SUFFIX = "words";
   public static final String SEARCH_PARTIAL_SUFFIX = "grams";
+  public static final String SEARCH_FUZZY_SUFFIX = "fuzzy";
 
   private final EsClient client;
 

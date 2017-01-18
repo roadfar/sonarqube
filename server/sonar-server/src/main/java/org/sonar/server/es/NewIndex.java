@@ -35,6 +35,7 @@ import org.sonar.process.ProcessProperties;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static org.sonar.server.es.BaseIndex.SEARCH_FUZZY_SUFFIX;
 import static org.sonar.server.es.BaseIndex.SEARCH_PARTIAL_SUFFIX;
 import static org.sonar.server.es.BaseIndex.SEARCH_WORDS_SUFFIX;
 import static org.sonar.server.es.BaseIndex.SORT_SUFFIX;
@@ -237,6 +238,15 @@ public class NewIndex {
       return this;
     }
 
+    public StringFieldBuilder enableFuzzySearch() {
+      addSubField(SEARCH_FUZZY_SUFFIX, ImmutableSortedMap.of(
+        "type", "string",
+        "index", "analyzed",
+        "analyzer", DefaultIndexSettings.ANALYZER_INDEX_FUZZY,
+        "search_analyzer", DefaultIndexSettings.ANALYZER_SEARCH_FUZZY));
+      return this;
+    }
+
     /**
      * Norms consume useless memory if string field is used for filtering or aggregations.
      *
@@ -312,6 +322,5 @@ public class NewIndex {
       return indexType.setProperty(fieldName, hash);
     }
   }
-
 
 }
