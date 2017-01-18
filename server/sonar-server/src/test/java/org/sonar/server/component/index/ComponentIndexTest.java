@@ -249,6 +249,13 @@ public class ComponentIndexTest {
   }
 
   @Test
+  public void should_ignore_single_missing_characters_in_subterms() {
+    ComponentDto project = indexProject("key-1", "TheSonarQubeGuide");
+
+    assertSearchResults("sonqube", project);
+  }
+
+  @Test
   public void should_respect_confidentiallity() {
     indexer.index(newProject("sonarqube", "Quality Product"));
 
