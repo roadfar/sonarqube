@@ -20,42 +20,41 @@
 package org.sonar.api.resources;
 
 import org.junit.Test;
+import org.sonar.api.CoreProperties;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
+import org.sonar.api.batch.fs.internal.DefaultInputModule;
+import org.sonar.api.batch.fs.internal.InputModuleHierarchy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class ProjectTest {
-  //TODO
-/*
+  private InputModuleHierarchy moduleHierarchy = mock(InputModuleHierarchy.class);
+
   @Test
   public void effectiveKeyShouldEqualKey() {
-    assertThat(new Project("my:project").getEffectiveKey()).isEqualTo("my:project");
+    DefaultInputModule module = new DefaultInputModule("my:project");
+    assertThat(new Project(module, moduleHierarchy).getEffectiveKey()).isEqualTo("my:project");
   }
 
-  @Test
-  public void createFromMavenIds() {
-    Project project = Project.createFromMavenIds("my", "artifact");
-
-    assertThat(project.getKey()).isEqualTo("my:artifact");
-  }
-  
   @Test
   public void setNameWithBranch() {
-    Project project = new Project("key", "branch", "name");
+    DefaultInputModule module = new DefaultInputModule(ProjectDefinition.create()
+      .setProperty(CoreProperties.PROJECT_BRANCH_PROPERTY, "branch")
+      .setKey("key")
+      .setName("name"), 1);
+    Project project = new Project(module, moduleHierarchy);
     assertThat(project.getName()).isEqualTo("name branch");
     assertThat(project.getOriginalName()).isEqualTo("name branch");
-
-    project.setOriginalName("Project1");
-    assertThat(project.getOriginalName()).isEqualTo("Project1 branch");
   }
-  
+
   @Test
   public void setNameWithoutBranch() {
-    Project project = new Project("key", null, "name");
+    DefaultInputModule module = new DefaultInputModule(ProjectDefinition.create()
+      .setKey("key")
+      .setName("name"), 1);
+    Project project = new Project(module, moduleHierarchy);
     assertThat(project.getName()).isEqualTo("name");
     assertThat(project.getOriginalName()).isEqualTo("name");
-
-    project.setOriginalName("Project1");
-    assertThat(project.getOriginalName()).isEqualTo("Project1");
   }
-*/
 }

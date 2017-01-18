@@ -30,6 +30,8 @@ import org.sonar.api.utils.PathUtils;
 
 public class TestInputFileBuilder {
   public static int batchId = 1;
+
+  private final int id;
   private final String relativePath;
   private final String moduleKey;
   private Path moduleBaseDir;
@@ -44,9 +46,14 @@ public class TestInputFileBuilder {
   private int[] originalLineOffsets;
 
   public TestInputFileBuilder(String moduleKey, String relativePath) {
+    this(moduleKey, relativePath, batchId++);
+  }
+
+  public TestInputFileBuilder(String moduleKey, String relativePath, int id) {
     this.moduleKey = moduleKey;
     this.moduleBaseDir = Paths.get(moduleKey);
     this.relativePath = PathUtils.sanitize(relativePath);
+    this.id = id;
   }
 
   public TestInputFileBuilder setModuleBaseDir(Path moduleBaseDir) {
@@ -113,7 +120,7 @@ public class TestInputFileBuilder {
   }
 
   public DefaultInputFile build() {
-    DefaultIndexedFile indexedFile = new DefaultIndexedFile(moduleKey, moduleBaseDir, relativePath, type, batchId++);
+    DefaultIndexedFile indexedFile = new DefaultIndexedFile(moduleKey, moduleBaseDir, relativePath, type, id);
     indexedFile.setLanguage(language);
     DefaultInputFile inputFile = new DefaultInputFile(indexedFile, f -> new Metadata(lines, nonBlankLines, hash, originalLineOffsets, lastValidOffset));
     inputFile.setStatus(status);

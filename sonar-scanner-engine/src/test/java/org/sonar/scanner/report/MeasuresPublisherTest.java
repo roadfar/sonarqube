@@ -70,8 +70,8 @@ public class MeasuresPublisherTest {
   public void prepare() throws IOException {
     inputFile = new TestInputFileBuilder("foo", "src/Foo.php").build();
     componentCache = new InputComponentStore();
-    componentCache.put("foo", new DefaultInputModule("foo"));
-    componentCache.put("foo", inputFile);
+    componentCache.put(new DefaultInputModule("foo"));
+    componentCache.put(inputFile);
     measureCache = mock(MeasureCache.class);
     when(measureCache.byComponentKey(anyString())).thenReturn(Collections.<DefaultMeasure<?>>emptyList());
     publisher = new MeasuresPublisher(componentCache, measureCache, mock(TestPlanBuilder.class));

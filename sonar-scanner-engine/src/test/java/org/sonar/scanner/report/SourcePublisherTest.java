@@ -56,8 +56,8 @@ public class SourcePublisherTest {
       .setCharset(StandardCharsets.ISO_8859_1)
       .build();
     componentStore = new InputComponentStore();
-    componentStore.put("foo", new DefaultInputModule("foo"));
-    componentStore.put("foo", inputFile);
+    componentStore.put(new DefaultInputModule("foo"));
+    componentStore.put(inputFile);
     publisher = new SourcePublisher(componentStore);
     File outputDir = temp.newFolder();
     writer = new ScannerReportWriter(outputDir);

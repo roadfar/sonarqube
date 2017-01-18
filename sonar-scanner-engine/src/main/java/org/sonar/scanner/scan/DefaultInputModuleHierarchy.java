@@ -21,7 +21,6 @@ package org.sonar.scanner.scan;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +33,9 @@ import org.sonar.api.batch.fs.internal.DefaultInputModule;
 import org.sonar.api.batch.fs.internal.InputModuleHierarchy;
 import org.sonar.api.scan.filesystem.PathResolver;
 import org.sonar.scanner.scan.filesystem.BatchIdGenerator;
-import org.sonar.scanner.util.TreeNode;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public class DefaultInputModuleHierarchy implements InputModuleHierarchy, Startable {
   private final PathResolver pathResolver = new PathResolver();
@@ -42,8 +43,9 @@ public class DefaultInputModuleHierarchy implements InputModuleHierarchy, Starta
   private final DefaultComponentTree componentTree;
   private final BatchIdGenerator batchIdGenerator;
 
-  private TreeNode<DefaultInputModule> root;
-  private Map<DefaultInputModule, TreeNode<DefaultInputModule>> index;
+  private DefaultInputModule root;
+  private Map<DefaultInputModule, DefaultInputModule> parents;
+  private Multimap<DefaultInputModule, DefaultInputModule> children;
 
   public DefaultInputModuleHierarchy(ImmutableProjectReactor projectReactor, DefaultComponentTree componentTree, BatchIdGenerator batchIdGenerator) {
     this.projectReactor = projectReactor;
@@ -57,53 +59,40 @@ public class DefaultInputModuleHierarchy implements InputModuleHierarchy, Starta
   }
 
   void doStart(ProjectDefinition rootProjectDefinition) {
-    index = new HashMap<>();
-    DefaultInputModule rootModule = new DefaultInputModule(rootProjectDefinition, batchIdGenerator.get());
-    root = new TreeNode<>(rootModule);
-    index.put(rootModule, root);
-
-    createChildren(rootProjectDefinition, root);
+    parents = new HashMap<>();
+    children = HashMultimap.create();
+    root = new DefaultInputModule(rootProjectDefinition, batchIdGenerator.get());
+    createChildren(root);
   }
 
-  private void createChildren(ProjectDefinition parentDef, TreeNode<DefaultInputModule> parent) {
-    for (ProjectDefinition def : parentDef.getSubProjects()) {
-      DefaultInputModule childModule = new DefaultInputModule(def, batchIdGenerator.get());
-      TreeNode<DefaultInputModule> childNode = new TreeNode<>(childModule);
-      childNode.setParent(parent.value());
-      parent.addChild(childNode.value());
-      index.put(childModule, childNode);
-      componentTree.index(childModule, parent.value());
-      createChildren(def, childNode);
+  private void createChildren(DefaultInputModule parent) {
+    for (ProjectDefinition def : parent.definition().getSubProjects()) {
+      DefaultInputModule child = new DefaultInputModule(def, batchIdGenerator.get());
+      parents.put(parent, child);
+      children.put(child, parent);
+      componentTree.index(child, parent);
+      createChildren(child);
     }
   }
 
   @Override
   public DefaultInputModule root() {
-    return root.value();
+    return root;
   }
 
   @Override
   public Collection<DefaultInputModule> children(InputModule component) {
-    TreeNode<DefaultInputModule> node = index.get(component);
-    if (node == null) {
-      return Collections.emptyList();
-    }
-    return node.children();
+    return children.get((DefaultInputModule) component);
   }
 
   @Override
   public DefaultInputModule parent(InputModule component) {
-    TreeNode<DefaultInputModule> node = index.get(component);
-    if (node == null) {
-      return null;
-    }
-
-    return node.parent();
+    return parents.get(component);
   }
 
   @Override
   public boolean isRoot(InputModule module) {
-    return root.value().equals(module);
+    return root.equals(module);
   }
 
   @Override

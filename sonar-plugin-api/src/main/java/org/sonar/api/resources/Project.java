@@ -44,6 +44,7 @@ public class Project extends Resource implements Component {
     this.module = (DefaultInputModule) module;
     this.moduleHierarchy = moduleHierarchy;
     this.setKey(module.key());
+    this.setEffectiveKey(module.key());
   }
 
   public DefaultInputModule inputModule() {
@@ -57,7 +58,7 @@ public class Project extends Resource implements Component {
 
   @Override
   public String path() {
-    DefaultInputModule parent = (DefaultInputModule) moduleHierarchy.parent(module);
+    DefaultInputModule parent = moduleHierarchy.parent(module);
     if (parent == null) {
       return null;
     }

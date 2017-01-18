@@ -30,12 +30,14 @@ import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputModule;
+import org.sonar.api.batch.fs.internal.DefaultInputDir;
+import org.sonar.api.batch.fs.internal.DefaultInputFile;
 
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 /**
- * Cache of all files and dirs. This cache is shared amongst all project modules. Inclusion and
+ * Store of all files and dirs. This cache is shared amongst all project modules. Inclusion and
  * exclusion patterns are already applied.
  */
 @ScannerSide
@@ -50,7 +52,7 @@ public class InputComponentStore {
   public Collection<InputComponent> all() {
     return inputComponents.values();
   }
-  
+
   public Iterable<InputFile> allFiles() {
     return inputFileCache.values();
   }
@@ -62,11 +64,11 @@ public class InputComponentStore {
   public InputComponent getByKey(String key) {
     return inputComponents.get(key);
   }
-  
+
   public void setRoot(InputModule root) {
     this.root = root;
   }
-  
+
   @CheckForNull
   public InputModule root() {
     return root;
@@ -86,24 +88,28 @@ public class InputComponentStore {
     return this;
   }
 
-  public InputComponentStore remove(String moduleKey, InputFile inputFile) {
-    inputFileCache.remove(moduleKey, inputFile.relativePath());
+  public InputComponentStore remove(InputFile inputFile) {
+    DefaultInputFile file = (DefaultInputFile) inputFile;
+    inputFileCache.remove(file.moduleKey(), inputFile.relativePath());
     return this;
   }
 
-  public InputComponentStore remove(String moduleKey, InputDir inputDir) {
-    inputDirCache.remove(moduleKey, inputDir.relativePath());
+  public InputComponentStore remove(InputDir inputDir) {
+    DefaultInputDir dir = (DefaultInputDir) inputDir;
+    inputDirCache.remove(dir.moduleKey(), inputDir.relativePath());
     return this;
   }
 
-  public InputComponentStore put(String moduleKey, InputFile inputFile) {
-    inputFileCache.put(moduleKey, inputFile.relativePath(), inputFile);
+  public InputComponentStore put(InputFile inputFile) {
+    DefaultInputFile file = (DefaultInputFile) inputFile;
+    inputFileCache.put(file.moduleKey(), inputFile.relativePath(), inputFile);
     inputComponents.put(inputFile.key(), inputFile);
     return this;
   }
 
-  public InputComponentStore put(String moduleKey, InputDir inputDir) {
-    inputDirCache.put(moduleKey, inputDir.relativePath(), inputDir);
+  public InputComponentStore put(InputDir inputDir) {
+    DefaultInputDir dir = (DefaultInputDir) inputDir;
+    inputDirCache.put(dir.moduleKey(), inputDir.relativePath(), inputDir);
     inputComponents.put(inputDir.key(), inputDir);
     return this;
   }
@@ -123,9 +129,9 @@ public class InputComponentStore {
     return inputModuleCache.get(moduleKey);
   }
 
-  public void put(String moduleKey, InputModule inputModule) {
+  public void put(InputModule inputModule) {
     inputComponents.put(inputModule.key(), inputModule);
-    inputModuleCache.put(moduleKey, inputModule);
+    inputModuleCache.put(inputModule.key(), inputModule);
   }
 
 }

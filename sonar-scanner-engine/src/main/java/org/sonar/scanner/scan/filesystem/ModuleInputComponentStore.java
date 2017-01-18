@@ -27,48 +27,48 @@ import org.sonar.api.batch.fs.InputModule;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 
 @ScannerSide
-public class ModuleInputComponentCache extends DefaultFileSystem.Cache {
+public class ModuleInputComponentStore extends DefaultFileSystem.Cache {
 
   private final String moduleKey;
-  private final InputComponentStore inputPathCache;
+  private final InputComponentStore inputComponentStore;
 
-  public ModuleInputComponentCache(ProjectDefinition projectDef, InputComponentStore projectCache) {
+  public ModuleInputComponentStore(ProjectDefinition projectDef, InputComponentStore inputComponentStore) {
     this.moduleKey = projectDef.getKeyWithBranch();
-    this.inputPathCache = projectCache;
+    this.inputComponentStore = inputComponentStore;
   }
 
   @Override
   public Iterable<InputFile> inputFiles() {
-    return inputPathCache.filesByModule(moduleKey);
+    return inputComponentStore.filesByModule(moduleKey);
   }
 
   @Override
   public InputFile inputFile(String relativePath) {
-    return inputPathCache.getFile(moduleKey, relativePath);
+    return inputComponentStore.getFile(moduleKey, relativePath);
   }
 
   @Override
   public InputDir inputDir(String relativePath) {
-    return inputPathCache.getDir(moduleKey, relativePath);
+    return inputComponentStore.getDir(moduleKey, relativePath);
   }
 
   @Override
   protected void doAdd(InputFile inputFile) {
-    inputPathCache.put(moduleKey, inputFile);
+    inputComponentStore.put(inputFile);
   }
 
   @Override
   protected void doAdd(InputDir inputDir) {
-    inputPathCache.put(moduleKey, inputDir);
+    inputComponentStore.put(inputDir);
   }
-  
+
   @Override
   protected void doAdd(InputModule inputModule) {
-    inputPathCache.put(moduleKey, inputModule);
+    inputComponentStore.put(inputModule);
   }
 
   @Override
   public InputModule module() {
-    return inputPathCache.getModule(moduleKey);
+    return inputComponentStore.getModule(moduleKey);
   }
 }

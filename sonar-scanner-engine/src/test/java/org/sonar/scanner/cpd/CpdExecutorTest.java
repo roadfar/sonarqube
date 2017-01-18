@@ -90,7 +90,7 @@ public class CpdExecutorTest {
     executor = new CpdExecutor(settings, index, publisher, componentStore);
     reader = new ScannerReportReader(outputDir);
 
-    componentStore.put("foo", new DefaultInputModule("foo"));
+    componentStore.put(new DefaultInputModule("foo"));
 
     batchComponent1 = createComponent("src/Foo.php", 5);
     batchComponent2 = createComponent("src/Foo2.php", 5);
@@ -102,7 +102,7 @@ public class CpdExecutorTest {
       .setModuleBaseDir(baseDir.toPath())
       .setLines(lines)
       .build();
-    componentStore.put("foo", file);
+    componentStore.put(file);
     return file;
   }
 

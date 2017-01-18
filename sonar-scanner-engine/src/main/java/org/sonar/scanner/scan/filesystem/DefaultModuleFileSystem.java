@@ -47,7 +47,7 @@ public class DefaultModuleFileSystem extends DefaultFileSystem {
   private boolean initialized;
   private Charset charset = null;
 
-  public DefaultModuleFileSystem(ModuleInputComponentCache moduleInputFileCache, DefaultInputModule module,
+  public DefaultModuleFileSystem(ModuleInputComponentStore moduleInputFileCache, DefaultInputModule module,
     Settings settings, FileIndexer indexer, ModuleFileSystemInitializer initializer, DefaultAnalysisMode mode,
     ProjectRepositories projectRepositories) {
     super(initializer.baseDir(), moduleInputFileCache);

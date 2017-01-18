@@ -78,7 +78,7 @@ public class DefaultPostJobContextTest {
     assertThat(issue.severity()).isEqualTo(Severity.BLOCKER);
     assertThat(issue.inputComponent()).isNull();
 
-    componentStore.put("foo", new TestInputFileBuilder("foo", "src/Foo.php").build());
+    componentStore.put(new TestInputFileBuilder("foo", "src/Foo.php").build());
     assertThat(issue.inputComponent()).isNotNull();
 
   }
