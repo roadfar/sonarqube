@@ -1,0 +1,38 @@
+{
+  "measures": [
+    {
+      "metric": "ncloc",
+      "history": [
+        {
+          "date": "2017-01-06…",
+          "value": "50"
+        },
+        {
+          "date": "2017-01-06…",
+          "value": "55"
+        },
+        {
+          "date": "2017-01-06…",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "metric": "new_violations",
+      "history": [
+        {
+          "date": "2017-01-06…",
+          "value": "2"
+        },
+        {
+          "date": "2017-01-06…",
+          "value": "0"
+        },
+        {
+          "date": "2017-01-06…",
+          "value": "5"
+        }
+      ]
+    }
+  ]
+}
