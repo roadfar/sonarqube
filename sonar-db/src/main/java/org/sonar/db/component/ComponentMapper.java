@@ -77,6 +77,8 @@ public interface ComponentMapper {
    */
   List<ComponentDto> selectProjects();
 
+  List<ComponentDto> selectAllRootsByOrganization(@Param("organizationUuid") String organizationUuid);
+
   /**
    * Return all descendant modules (including itself) from a given component uuid and scope
    */
