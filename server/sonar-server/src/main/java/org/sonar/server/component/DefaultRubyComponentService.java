@@ -39,6 +39,7 @@ import org.sonar.server.util.RubyUtils;
 
 import static org.sonar.server.component.NewComponent.newComponentBuilder;
 
+// TODO delete this class
 public class DefaultRubyComponentService implements RubyComponentService {
 
   private final DbClient dbClient;
