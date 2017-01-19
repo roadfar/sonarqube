@@ -29,8 +29,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.sonar.api.Startable;
 import org.sonar.db.DbClient;
 import org.sonar.db.DbSession;
@@ -95,18 +93,10 @@ public class ComponentIndexer implements Startable {
   }
 
   private void deleteComponentsByProjectUuid(String projectUuid) {
-    BulkIndexer.delete(esClient, INDEX_COMPONENTS, projectUuidSearch(projectUuid));
-  }
-
-  private SearchRequestBuilder projectUuidSearch(String projectUuid) {
-    return esClient.prepareSearch(INDEX_COMPONENTS)
-      .setQuery(projectUuidFilter(projectUuid));
-  }
-
-  private static BoolQueryBuilder projectUuidFilter(String projectUuid) {
-    return boolQuery()
-      .filter(
-        termQuery(ComponentIndexDefinition.FIELD_PROJECT_UUID, projectUuid));
+    BulkIndexer.delete(esClient, INDEX_COMPONENTS, esClient.prepareSearch(INDEX_COMPONENTS)
+      .setQuery(boolQuery()
+        .filter(
+          termQuery(ComponentIndexDefinition.FIELD_PROJECT_UUID, projectUuid))));
   }
 
   private void deleteAuthorizationByProjectUuid(String projectUuid) {
