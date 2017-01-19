@@ -116,7 +116,9 @@ public interface ComponentMapper {
 
   long countGhostProjects(Map<String, Object> parameters);
 
-  void selectAll(ResultHandler handler);
+  List<ComponentDto> selectForIndexing(ResultHandler handler);
+
+  List<ComponentDto> selectForIndexing(String projectUuid);
 
   void insert(ComponentDto componentDto);
 

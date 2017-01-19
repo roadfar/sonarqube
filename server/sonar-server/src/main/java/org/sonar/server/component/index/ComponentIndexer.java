@@ -65,7 +65,7 @@ public class ComponentIndexer implements Startable {
       bulk.setLarge(true);
       bulk.start();
       dbClient.componentDao()
-        .selectAll(dbSession, context -> {
+        .selectForIndexing(dbSession, context -> {
           ComponentDto dto = (ComponentDto) context.getResultObject();
           bulk.add(newIndexRequest(toDocument(dto)));
         });
@@ -82,7 +82,7 @@ public class ComponentIndexer implements Startable {
       index(
         dbClient
           .componentDao()
-          .selectByProjectUuid(projectUuid, dbSession)
+          .selectForIndexing(dbSession, projectUuid)
           .toArray(new ComponentDto[0]));
     }
   }

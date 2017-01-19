@@ -414,11 +414,16 @@
     </if>
   </sql>
 
-  <select id="selectAll" parameterType="map" resultType="Component">
-    select distinct
-    <include refid="componentColumns"/>
+  <select id="selectForIndexing" parameterType="String" resultType="Component">
+    select
+      <include refid="componentColumns"/>
     from projects p
-    where p.enabled=${_true}
+    where
+      p.enabled=${_true}
+      and p.copy_component_uuid is null
+      <if test="query != null">
+        and p.project_uuid=#{query}
+      </if>
   </select>
 
   <insert id="insert" parameterType="Component" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
