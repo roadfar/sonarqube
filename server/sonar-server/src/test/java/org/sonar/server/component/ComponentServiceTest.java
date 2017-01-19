@@ -93,34 +93,8 @@ public class ComponentServiceTest {
   public void setUp() {
     i18n.put("qualifier.TRK", "Project");
 
-    underTest = new ComponentService(dbClient, i18n, userSession, system2, new ComponentFinder(dbClient), projectMeasuresIndexer, componentIndexer);
+    underTest = new ComponentService(dbClient, i18n, userSession, system2, projectMeasuresIndexer, componentIndexer);
     organization = dbTester.organizations().insert();
-  }
-
-  @Test
-  public void get_by_key() {
-    ComponentDto project = insertSampleProject();
-    assertThat(underTest.getByKey(project.getKey())).isNotNull();
-  }
-
-  @Test
-  public void get_nullable_by_key() {
-    ComponentDto project = insertSampleProject();
-    assertThat(underTest.getNullableByKey(project.getKey())).isNotNull();
-    assertThat(underTest.getNullableByKey("unknown")).isNull();
-  }
-
-  @Test
-  public void get_by_uuid() {
-    ComponentDto project = insertSampleProject();
-    assertThat(underTest.getNonNullByUuid(project.uuid())).isNotNull();
-  }
-
-  @Test
-  public void get_nullable_by_uuid() {
-    ComponentDto project = insertSampleProject();
-    assertThat(underTest.getByUuid(project.uuid())).isPresent();
-    assertThat(underTest.getByUuid("unknown")).isAbsent();
   }
 
   @Test
@@ -136,7 +110,7 @@ public class ComponentServiceTest {
         .build())
       .getKey();
 
-    ComponentDto project = underTest.getNullableByKey(key);
+    ComponentDto project = dbTester.getDbClient().componentDao().selectOrFailByKey(dbSession, key);
     assertThat(project.getOrganizationUuid()).isEqualTo(organization.getUuid());
     assertThat(project.key()).isEqualTo("struts");
     assertThat(project.deprecatedKey()).isEqualTo("struts");
@@ -167,7 +141,7 @@ public class ComponentServiceTest {
         .build())
       .getKey();
 
-    ComponentDto project = underTest.getNullableByKey(key);
+    ComponentDto project = dbTester.getDbClient().componentDao().selectOrFailByKey(dbSession, key);
     assertThat(project.getOrganizationUuid()).isEqualTo(organization.getUuid());
     assertThat(project.key()).isEqualTo("struts:origin/branch");
     assertThat(project.deprecatedKey()).isEqualTo("struts:origin/branch");
@@ -187,7 +161,7 @@ public class ComponentServiceTest {
         .build())
       .getKey();
 
-    ComponentDto project = underTest.getNullableByKey(key);
+    ComponentDto project = dbTester.getDbClient().componentDao().selectOrFailByKey(dbSession, key);
     assertThat(project.getOrganizationUuid()).isEqualTo(organization.getUuid());
     assertThat(project.key()).isEqualTo("all-project");
     assertThat(project.deprecatedKey()).isEqualTo("all-project");
@@ -220,7 +194,7 @@ public class ComponentServiceTest {
       .getKey();
     dbTester.getSession().commit();
 
-    ComponentDto dev = underTest.getNullableByKey(key);
+    ComponentDto dev = dbTester.getDbClient().componentDao().selectOrFailByKey(dbSession, key);
     assertThat(dev.getOrganizationUuid()).isEqualTo(organization.getUuid());
     assertThat(dev.key()).isEqualTo("DEV:jon.name@mail.com");
     assertThat(dev.deprecatedKey()).isEqualTo("DEV:jon.name@mail.com");
@@ -315,7 +289,7 @@ public class ComponentServiceTest {
       ComponentTesting.newProjectDto(organizationDto).setId(2L).setKey(projectKey),
       ComponentTesting.newProjectDto(organizationDto).setId(3L).setKey(projectKey)));
 
-    underTest = new ComponentService(dbClient, i18n, userSession, System2.INSTANCE, new ComponentFinder(dbClient), projectMeasuresIndexer, componentIndexer);
+    underTest = new ComponentService(dbClient, i18n, userSession, System2.INSTANCE, projectMeasuresIndexer, componentIndexer);
     underTest.create(
       session,
       newComponentBuilder()

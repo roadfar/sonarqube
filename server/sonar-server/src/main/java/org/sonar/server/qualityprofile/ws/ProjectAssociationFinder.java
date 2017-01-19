@@ -20,7 +20,8 @@
 package org.sonar.server.qualityprofile.ws;
 
 import javax.annotation.Nullable;
-import org.sonar.server.component.ComponentService;
+import org.sonar.db.DbSession;
+import org.sonar.server.component.ComponentFinder;
 import org.sonar.server.exceptions.NotFoundException;
 import org.sonar.server.qualityprofile.QProfile;
 import org.sonar.server.qualityprofile.QProfileLookup;
@@ -34,25 +35,25 @@ public class ProjectAssociationFinder {
   private static final String BAD_PROJECT_PARAMETERS_ERROR = "Either projectKey or projectUuid must be set";
 
   private final QProfileLookup profileLookup;
-  private final ComponentService componentService;
+  private final ComponentFinder componentFinder;
 
-  public ProjectAssociationFinder(QProfileLookup profileLookup, ComponentService componentService) {
+  public ProjectAssociationFinder(QProfileLookup profileLookup, ComponentFinder componentFinder) {
     this.profileLookup = profileLookup;
-    this.componentService = componentService;
+    this.componentFinder = componentFinder;
   }
 
-  public String getProfileKey(@Nullable String language, @Nullable String profileName, @Nullable String profileKey) {
+  public String getProfileKey(DbSession dbSession, @Nullable String language, @Nullable String profileName, @Nullable String profileKey) {
     checkArgument((!isEmpty(language) && !isEmpty(profileName)) ^ !isEmpty(profileKey), BAD_PROFILE_PARAMETERS_ERROR);
-    return profileKey == null ? getProfileKeyFromLanguageAndName(language, profileName) : profileKey;
+    return profileKey == null ? getProfileKeyFromLanguageAndName(dbSession, language, profileName) : profileKey;
   }
 
-  public String getProjectUuid(@Nullable String projectKey, @Nullable String projectUuid) {
+  public String getProjectUuid(DbSession dbSession, @Nullable String projectKey, @Nullable String projectUuid) {
     checkArgument(!isEmpty(projectKey) ^ !isEmpty(projectUuid), BAD_PROJECT_PARAMETERS_ERROR);
-    return projectUuid == null ? componentService.getByKey(projectKey).uuid() : projectUuid;
+    return projectUuid == null ? componentFinder.getByKey(dbSession, projectKey).uuid() : projectUuid;
   }
 
-  private String getProfileKeyFromLanguageAndName(String language, String profileName) {
-    QProfile profile = profileLookup.profile(profileName, language);
+  private String getProfileKeyFromLanguageAndName(DbSession dbSession, String language, String profileName) {
+    QProfile profile = profileLookup.profile(profileName, language, dbSession);
     if (profile == null) {
       throw new NotFoundException(String.format("Unable to find a profile for language '%s' with name '%s'", language, profileName));
     }

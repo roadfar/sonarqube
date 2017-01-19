@@ -22,7 +22,6 @@ package org.sonar.server.qualityprofile.ws;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.sonar.api.config.MapSettings;
 import org.sonar.api.resources.Languages;
 import org.sonar.api.utils.System2;
 import org.sonar.db.DbClient;
@@ -34,12 +33,7 @@ import org.sonar.db.component.ComponentTesting;
 import org.sonar.db.qualityprofile.QualityProfileDbTester;
 import org.sonar.db.qualityprofile.QualityProfileDto;
 import org.sonar.server.component.ComponentFinder;
-import org.sonar.server.component.ComponentService;
-import org.sonar.server.component.index.ComponentIndexer;
-import org.sonar.server.es.EsTester;
 import org.sonar.server.language.LanguageTesting;
-import org.sonar.server.measure.index.ProjectMeasuresIndexDefinition;
-import org.sonar.server.measure.index.ProjectMeasuresIndexer;
 import org.sonar.server.qualityprofile.QProfileLookup;
 import org.sonar.server.qualityprofile.QProfileName;
 import org.sonar.server.qualityprofile.QProfileProjectOperations;
@@ -62,9 +56,6 @@ public class AddProjectActionTest {
   public DbTester dbTester = DbTester.create(system2);
 
   @Rule
-  public EsTester es = new EsTester(new ProjectMeasuresIndexDefinition(new MapSettings()));
-
-  @Rule
   public UserSessionRule userSession = UserSessionRule.standalone();
 
   private DbClient dbClient = dbTester.getDbClient();
@@ -75,13 +66,12 @@ public class AddProjectActionTest {
   private QProfileProjectOperations qProfileProjectOperations = new QProfileProjectOperations(dbClient);
   private Languages languages = LanguageTesting.newLanguages(LANGUAGE_1, LANGUAGE_2);
   private ProjectAssociationParameters projectAssociationParameters = new ProjectAssociationParameters(languages);
+  private ComponentFinder componentFinder = new ComponentFinder(dbClient);
 
   private ComponentDto project;
 
-  private WsActionTester ws = new WsActionTester(new AddProjectAction(projectAssociationParameters,
-    qProfileProjectOperations, new ProjectAssociationFinder(new QProfileLookup(dbClient),
-      new ComponentService(dbClient, null, userSession, null, new ComponentFinder(dbClient), new ProjectMeasuresIndexer(system2, dbClient, es.client()),
-        new ComponentIndexer(dbClient, es.client()))),
+  private WsActionTester ws = new WsActionTester(new AddProjectAction(dbClient, projectAssociationParameters,
+    qProfileProjectOperations, new ProjectAssociationFinder(new QProfileLookup(dbClient), componentFinder),
     userSession));
 
   @Before

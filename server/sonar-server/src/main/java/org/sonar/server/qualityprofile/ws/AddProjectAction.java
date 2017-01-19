@@ -23,6 +23,8 @@ import org.sonar.api.server.ws.Request;
 import org.sonar.api.server.ws.Response;
 import org.sonar.api.server.ws.WebService;
 import org.sonar.api.server.ws.WebService.NewAction;
+import org.sonar.db.DbClient;
+import org.sonar.db.DbSession;
 import org.sonar.server.qualityprofile.QProfileProjectOperations;
 import org.sonar.server.user.UserSession;
 import org.sonarqube.ws.client.qualityprofile.AddProjectRequest;
@@ -36,13 +38,15 @@ import static org.sonarqube.ws.client.qualityprofile.QualityProfileWsParameters.
 
 public class AddProjectAction implements QProfileWsAction {
 
+  private final DbClient dbClient;
   private final ProjectAssociationParameters projectAssociationParameters;
   private final ProjectAssociationFinder projectAssociationFinder;
   private final QProfileProjectOperations profileProjectOperations;
   private final UserSession userSession;
 
-  public AddProjectAction(ProjectAssociationParameters projectAssociationParameters, QProfileProjectOperations profileProjectOperations,
+  public AddProjectAction(DbClient dbClient, ProjectAssociationParameters projectAssociationParameters, QProfileProjectOperations profileProjectOperations,
     ProjectAssociationFinder projectAssociationFinder, UserSession userSession) {
+    this.dbClient = dbClient;
     this.projectAssociationParameters = projectAssociationParameters;
     this.profileProjectOperations = profileProjectOperations;
     this.projectAssociationFinder = projectAssociationFinder;
@@ -61,10 +65,12 @@ public class AddProjectAction implements QProfileWsAction {
   @Override
   public void handle(Request request, Response response) throws Exception {
     AddProjectRequest addProjectRequest = toWsRequest(request);
-    String profileKey = projectAssociationFinder.getProfileKey(addProjectRequest.getLanguage(), addProjectRequest.getProfileName(), addProjectRequest.getProfileKey());
-    String projectUuid = projectAssociationFinder.getProjectUuid(addProjectRequest.getProjectKey(), addProjectRequest.getProjectUuid());
-    profileProjectOperations.addProject(profileKey, projectUuid, userSession);
-    response.noContent();
+    try (DbSession dbSession = dbClient.openSession(false)) {
+      String profileKey = projectAssociationFinder.getProfileKey(dbSession, addProjectRequest.getLanguage(), addProjectRequest.getProfileName(), addProjectRequest.getProfileKey());
+      String projectUuid = projectAssociationFinder.getProjectUuid(dbSession, addProjectRequest.getProjectKey(), addProjectRequest.getProjectUuid());
+      profileProjectOperations.addProject(profileKey, projectUuid, userSession);
+      response.noContent();
+    }
   }
 
   private static AddProjectRequest toWsRequest(Request request) {

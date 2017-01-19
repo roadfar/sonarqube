@@ -20,7 +20,6 @@
 package org.sonar.server.component;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.sonar.api.ce.ComputeEngineSide;
 import org.sonar.api.i18n.I18n;
@@ -61,61 +59,20 @@ public class ComponentService {
   private final I18n i18n;
   private final UserSession userSession;
   private final System2 system2;
-  private final ComponentFinder componentFinder;
   private final ProjectMeasuresIndexer projectMeasuresIndexer;
   private final ComponentIndexer componentIndexer;
 
-  public ComponentService(DbClient dbClient, I18n i18n, UserSession userSession, System2 system2, ComponentFinder componentFinder, ProjectMeasuresIndexer projectMeasuresIndexer,
+  public ComponentService(DbClient dbClient, I18n i18n, UserSession userSession, System2 system2, ProjectMeasuresIndexer projectMeasuresIndexer,
     ComponentIndexer componentIndexer) {
     this.dbClient = dbClient;
     this.i18n = i18n;
     this.userSession = userSession;
     this.system2 = system2;
-    this.componentFinder = componentFinder;
     this.projectMeasuresIndexer = projectMeasuresIndexer;
     this.componentIndexer = componentIndexer;
   }
 
-  public ComponentDto getByKey(String key) {
-    DbSession session = dbClient.openSession(false);
-    try {
-      return getByKey(session, key);
-    } finally {
-      session.close();
-    }
-  }
-
-  @CheckForNull
-  public ComponentDto getNullableByKey(String key) {
-    DbSession session = dbClient.openSession(false);
-    try {
-      Optional<ComponentDto> component = dbClient.componentDao().selectByKey(session, key);
-      return component.orNull();
-    } finally {
-      session.close();
-    }
-  }
-
-  public ComponentDto getNonNullByUuid(String uuid) {
-    DbSession session = dbClient.openSession(false);
-    try {
-      return dbClient.componentDao().selectOrFailByUuid(session, uuid);
-    } finally {
-      session.close();
-    }
-  }
-
-  public Optional<ComponentDto> getByUuid(String uuid) {
-    DbSession session = dbClient.openSession(false);
-    try {
-      return dbClient.componentDao().selectByUuid(session, uuid);
-    } finally {
-      session.close();
-    }
-  }
-
-  public void updateKey(DbSession dbSession, String projectOrModuleKey, String newKey) {
-    ComponentDto component = componentFinder.getByKey(dbSession, projectOrModuleKey);
+  public void updateKey(DbSession dbSession, ComponentDto component, String newKey) {
     userSession.checkComponentUuidPermission(UserRole.ADMIN, component.projectUuid());
     checkIsProjectOrModule(component);
     checkProjectOrModuleKeyFormat(newKey);
@@ -157,9 +114,7 @@ public class ComponentService {
   private ComponentDto createRootComponent(DbSession session, NewComponent newComponent) {
     checkBranchFormat(newComponent.qualifier(), newComponent.branch());
     String keyWithBranch = ComponentKeys.createKey(newComponent.key(), newComponent.branch());
-
-    ComponentDto existingComponent = getNullableByKey(keyWithBranch);
-    if (existingComponent != null) {
+    if (dbClient.componentDao().selectByKey(session, keyWithBranch).isPresent()) {
       throw new BadRequestException(formatMessage("Could not create %s, key already exists: %s", newComponent.qualifier(), keyWithBranch));
     }
 
@@ -272,7 +227,4 @@ public class ComponentService {
     return String.format(message, i18n.message(Locale.getDefault(), "qualifier." + qualifier, "Project"), key);
   }
 
-  private ComponentDto getByKey(DbSession session, String key) {
-    return componentFinder.getByKey(session, key);
-  }
 }
