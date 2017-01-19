@@ -178,7 +178,7 @@ public class ComponentIndexerTest {
         .setQuery(termQuery(FIELD_NAME, nameQuery))
         .get()
         .getHits()
-        .getHits().length).isEqualTo(numberOfMatches);
+        .getTotalHits()).isEqualTo(numberOfMatches);
   }
 
   private ComponentIndexer createIndexer() {
