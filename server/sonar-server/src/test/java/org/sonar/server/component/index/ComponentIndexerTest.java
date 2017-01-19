@@ -101,7 +101,7 @@ public class ComponentIndexerTest {
   }
 
   @Test
-  public void reindex_project() {
+  public void index_and_update_and_reindex_project() {
 
     // insert
     ComponentDto component = ComponentTesting.newProjectDto(organization, "UUID-1").setName("OldName");
@@ -122,7 +122,7 @@ public class ComponentIndexerTest {
   }
 
   @Test
-  public void reindex_project_with_files() {
+  public void index_and_update_and_reindex_project_with_files() {
 
     // insert
     ComponentDto project = dbTester.components().insertProject();
