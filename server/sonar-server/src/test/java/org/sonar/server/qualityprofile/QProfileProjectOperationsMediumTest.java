@@ -36,8 +36,6 @@ import org.sonar.db.permission.UserPermissionDao;
 import org.sonar.db.permission.UserPermissionDto;
 import org.sonar.db.qualityprofile.QualityProfileDto;
 import org.sonar.db.user.UserDto;
-import org.sonar.server.organization.DefaultOrganization;
-import org.sonar.server.organization.DefaultOrganizationProvider;
 import org.sonar.server.tester.MockUserSession;
 import org.sonar.server.tester.ServerTester;
 import org.sonar.server.tester.UserSessionRule;
@@ -46,24 +44,24 @@ import org.sonar.server.user.UserSession;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class QProfileProjectOperationsMediumTest {
+  private static final String PROJECT_KEY = "SonarQube";
+  private static final String PROJECT_UUID = "ABCD";
 
   @ClassRule
   public static ServerTester tester = new ServerTester().withEsIndexes();
   @Rule
   public UserSessionRule userSessionRule = UserSessionRule.forServerTester(tester);
 
-  DbClient db;
-  DbSession dbSession;
-  QProfileFactory factory;
-  QProfileProjectOperations projectOperations;
-  OrganizationDto organization;
-  ComponentDto project;
-  QualityProfileDto profile;
-  static final String PROJECT_KEY = "SonarQube";
-  static final String PROJECT_UUID = "ABCD";
+  private DbClient db;
+  private DbSession dbSession;
+  private QProfileFactory factory;
+  private QProfileProjectOperations projectOperations;
+  private OrganizationDto organization;
+  private ComponentDto project;
+  private QualityProfileDto profile;
 
-  UserSession authorizedProfileAdminUserSession = new MockUserSession("john").setName("John").setGlobalPermissions(GlobalPermissions.QUALITY_PROFILE_ADMIN);
-  UserSession authorizedProjectAdminUserSession = new MockUserSession("john").setName("John").addProjectPermissions(UserRole.ADMIN, PROJECT_KEY);
+  private UserSession authorizedProfileAdminUserSession = new MockUserSession("john").setName("John").setGlobalPermissions(GlobalPermissions.QUALITY_PROFILE_ADMIN);
+  private UserSession authorizedProjectAdminUserSession = new MockUserSession("john").setName("John").addProjectPermissions(UserRole.ADMIN, PROJECT_KEY);
 
   @Before
   public void before() {
@@ -140,9 +138,8 @@ public class QProfileProjectOperationsMediumTest {
     // Create a user having user permission on the two projects and the global quality profile admin permission
     UserDto user = new UserDto().setLogin("john").setName("John").setEmail("jo@hn.com").setCreatedAt(System.currentTimeMillis()).setUpdatedAt(System.currentTimeMillis());
     db.userDao().insert(dbSession, user);
-    DefaultOrganization defaultOrganization = tester.get(DefaultOrganizationProvider.class).get();
-    tester.get(UserPermissionDao.class).insert(dbSession, new UserPermissionDto(defaultOrganization.getUuid(), UserRole.USER, user.getId(), project1.getId()));
-    tester.get(UserPermissionDao.class).insert(dbSession, new UserPermissionDto(defaultOrganization.getUuid(), UserRole.USER, user.getId(), project2.getId()));
+    tester.get(UserPermissionDao.class).insert(dbSession, new UserPermissionDto(organization.getUuid(), UserRole.USER, user.getId(), project1.getId()));
+    tester.get(UserPermissionDao.class).insert(dbSession, new UserPermissionDto(organization.getUuid(), UserRole.USER, user.getId(), project2.getId()));
     UserSession userSession = userSessionRule.login("john").setUserId(user.getId().intValue()).setName("John")
       .setGlobalPermissions(GlobalPermissions.QUALITY_PROFILE_ADMIN);
 
