@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.CheckForNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.sonar.api.batch.fs.InputModule;
 import org.sonar.api.batch.fs.internal.DefaultInputModule;
@@ -71,7 +72,11 @@ public class Project extends Resource implements Component {
 
   @CheckForNull
   public String getOriginalName() {
-    return module.definition().getOriginalName();
+    String name = module.definition().getOriginalName();
+    if (StringUtils.isNotEmpty(getBranch())) {
+      name = name + " " + getBranch();
+    }
+    return name;
   }
 
   java.io.File getBaseDir() {
@@ -80,7 +85,11 @@ public class Project extends Resource implements Component {
 
   @Override
   public String name() {
-    return module.definition().getName();
+    String name = module.definition().getName();
+    if (StringUtils.isNotEmpty(getBranch())) {
+      name = name + " " + getBranch();
+    }
+    return name;
   }
 
   @Override
