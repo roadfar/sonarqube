@@ -35,12 +35,10 @@ import org.sonar.server.platform.db.migration.charset.DatabaseCharsetChecker;
 import org.sonar.server.platform.db.migration.history.MigrationHistoryTable;
 import org.sonar.server.platform.db.migration.history.MigrationHistoryTableImpl;
 import org.sonar.server.platform.db.migration.version.DatabaseVersion;
-import org.sonar.server.platform.web.RailsAppsDeployer;
 import org.sonar.server.plugins.InstalledPluginReferentialFactory;
 import org.sonar.server.plugins.ServerPluginJarExploder;
 import org.sonar.server.plugins.ServerPluginRepository;
 import org.sonar.server.plugins.WebServerExtensionInstaller;
-import org.sonar.server.ruby.PlatformRubyBridge;
 import org.sonar.server.ui.JRubyI18n;
 
 public class PlatformLevel2 extends PlatformLevel {
@@ -60,9 +58,6 @@ public class PlatformLevel2 extends PlatformLevel {
       Durations.class,
       JRubyI18n.class,
 
-      // depends on Ruby
-      PlatformRubyBridge.class,
-
       // plugins
       ServerPluginRepository.class,
       ServerPluginJarExploder.class,
@@ -72,7 +67,6 @@ public class PlatformLevel2 extends PlatformLevel {
       WebServerExtensionInstaller.class,
 
       // depends on plugins
-      RailsAppsDeployer.class,
       DefaultI18n.class,
       RuleI18nManager.class);
 
