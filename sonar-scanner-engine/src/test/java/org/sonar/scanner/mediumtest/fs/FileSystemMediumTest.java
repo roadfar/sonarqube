@@ -201,6 +201,7 @@ public class FileSystemMediumTest {
       .start();
 
     assertThat(result.inputFiles()).hasSize(4);
+    assertThat(result.inputDirs()).hasSize(3);
   }
 
   @Test

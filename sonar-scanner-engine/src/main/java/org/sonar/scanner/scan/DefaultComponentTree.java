@@ -19,12 +19,12 @@
  */
 package org.sonar.scanner.scan;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.CheckForNull;
 import org.sonar.api.batch.fs.InputComponent;
@@ -32,13 +32,13 @@ import org.sonar.api.batch.fs.internal.InputComponentTree;
 
 public class DefaultComponentTree implements InputComponentTree {
   private Map<InputComponent, InputComponent> parents = new HashMap<>();
-  private Map<InputComponent, List<InputComponent>> children = new HashMap<>();
+  private Map<InputComponent, Set<InputComponent>> children = new HashMap<>();
 
   public void index(InputComponent component, InputComponent parent) {
     parents.put(component, parent);
-    List<InputComponent> list = children.get(parent);
+    Set<InputComponent> list = children.get(parent);
     if (list == null) {
-      list = new ArrayList<>();
+      list = new LinkedHashSet<>();
       children.put(parent, list);
     }
 
@@ -47,7 +47,7 @@ public class DefaultComponentTree implements InputComponentTree {
 
   @Override
   public Collection<InputComponent> getChildren(InputComponent component) {
-    return children.getOrDefault(component, Collections.emptyList());
+    return children.getOrDefault(component, Collections.emptySet());
   }
 
   @CheckForNull

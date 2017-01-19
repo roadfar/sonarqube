@@ -68,8 +68,8 @@ public class DefaultInputModuleHierarchy implements InputModuleHierarchy, Starta
   private void createChildren(DefaultInputModule parent) {
     for (ProjectDefinition def : parent.definition().getSubProjects()) {
       DefaultInputModule child = new DefaultInputModule(def, batchIdGenerator.get());
-      parents.put(parent, child);
-      children.put(child, parent);
+      parents.put(child, parent);
+      children.put(parent, child);
       componentTree.index(child, parent);
       createChildren(child);
     }
