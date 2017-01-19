@@ -29,7 +29,6 @@ import org.sonar.scanner.protocol.output.ScannerReport;
 import org.sonar.scanner.protocol.output.ScannerReportWriter;
 import org.sonar.scanner.rule.ModuleQProfiles;
 import org.sonar.scanner.rule.QProfile;
-import org.sonar.scanner.scan.ImmutableProjectReactor;
 
 public class MetadataPublisher implements ReportPublisherStep {
 

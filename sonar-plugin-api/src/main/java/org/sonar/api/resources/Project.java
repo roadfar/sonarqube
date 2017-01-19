@@ -45,7 +45,7 @@ public class Project extends Resource implements Component {
     this.module = (DefaultInputModule) module;
     this.moduleHierarchy = moduleHierarchy;
     this.setKey(module.key());
-    this.setEffectiveKey(module.key());
+    this.setEffectiveKey(this.module.definition().getKeyWithBranch());
   }
 
   public DefaultInputModule inputModule() {

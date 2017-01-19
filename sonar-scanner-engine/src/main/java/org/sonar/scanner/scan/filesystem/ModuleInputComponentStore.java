@@ -20,7 +20,6 @@
 package org.sonar.scanner.scan.filesystem;
 
 import org.sonar.api.batch.ScannerSide;
-import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputModule;
@@ -32,8 +31,8 @@ public class ModuleInputComponentStore extends DefaultFileSystem.Cache {
   private final String moduleKey;
   private final InputComponentStore inputComponentStore;
 
-  public ModuleInputComponentStore(ProjectDefinition projectDef, InputComponentStore inputComponentStore) {
-    this.moduleKey = projectDef.getKeyWithBranch();
+  public ModuleInputComponentStore(InputModule module, InputComponentStore inputComponentStore) {
+    this.moduleKey = module.key();
     this.inputComponentStore = inputComponentStore;
   }
 

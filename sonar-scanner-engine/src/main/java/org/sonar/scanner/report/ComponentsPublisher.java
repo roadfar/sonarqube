@@ -67,8 +67,7 @@ public class ComponentsPublisher implements ReportPublisherStep {
     if (component instanceof InputModule) {
       DefaultInputModule inputModule = (DefaultInputModule) component;
       // Here we want key without branch
-      ProjectDefinition def = inputModule.definition();
-      builder.setKey(def.getKey());
+      builder.setKey(inputModule.key());
 
       // protocol buffers does not accept null values
       String name = getName(inputModule);
@@ -175,7 +174,11 @@ public class ComponentsPublisher implements ReportPublisherStep {
 
   @CheckForNull
   private static String getName(DefaultInputModule module) {
-    return module.definition().getOriginalName();
+    if (StringUtils.isNotEmpty(module.definition().getBranch())) {
+      return module.definition().getOriginalName() + " " + module.definition().getBranch();
+    } else {
+      return module.definition().getOriginalName();
+    }
   }
 
   @CheckForNull

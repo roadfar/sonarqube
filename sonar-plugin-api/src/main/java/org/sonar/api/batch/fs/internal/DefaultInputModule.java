@@ -37,7 +37,7 @@ public class DefaultInputModule extends DefaultInputComponent implements InputMo
   public DefaultInputModule(ProjectDefinition definition, int batchId) {
     super(batchId);
     this.definition = definition;
-    this.moduleKey = definition.getKey();
+    this.moduleKey = definition.getKeyWithBranch();
   }
 
   @Override

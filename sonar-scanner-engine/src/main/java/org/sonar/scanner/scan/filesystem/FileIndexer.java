@@ -66,12 +66,14 @@ public class FileIndexer {
   private final DefaultComponentTree componentTree;
   private final DefaultInputModule module;
   private final BatchIdGenerator batchIdGenerator;
+  private final InputComponentStore componentStore;
 
   private ProgressReport progressReport;
 
-  public FileIndexer(BatchIdGenerator batchIdGenerator, DefaultInputModule module, ExclusionFilters exclusionFilters,
+  public FileIndexer(BatchIdGenerator batchIdGenerator, InputComponentStore componentStore, DefaultInputModule module, ExclusionFilters exclusionFilters,
     DefaultComponentTree componentTree, IndexedFileBuilder indexedFileBuilder, MetadataGenerator inputFileBuilder, ProjectDefinition def, InputFileFilter[] filters) {
     this.batchIdGenerator = batchIdGenerator;
+    this.componentStore = componentStore;
     this.module = module;
     this.componentTree = componentTree;
     this.indexedFileBuilder = indexedFileBuilder;
@@ -81,9 +83,9 @@ public class FileIndexer {
     this.isAggregator = !def.getSubProjects().isEmpty();
   }
 
-  public FileIndexer(BatchIdGenerator batchIdGenerator, DefaultInputModule module, ExclusionFilters exclusionFilters,
+  public FileIndexer(BatchIdGenerator batchIdGenerator, InputComponentStore componentStore, DefaultInputModule module, ExclusionFilters exclusionFilters,
     DefaultComponentTree componentTree, IndexedFileBuilder indexedFileBuilder, MetadataGenerator inputFileBuilder, ProjectDefinition def) {
-    this(batchIdGenerator, module, exclusionFilters, componentTree, indexedFileBuilder, inputFileBuilder, def, new InputFileFilter[0]);
+    this(batchIdGenerator, componentStore, module, exclusionFilters, componentTree, indexedFileBuilder, inputFileBuilder, def, new InputFileFilter[0]);
   }
 
   void index(DefaultModuleFileSystem fileSystem) {
@@ -151,11 +153,14 @@ public class FileIndexer {
       throw new IllegalStateException("Failed to compute relative path of file: " + inputFile);
     }
 
-    DefaultInputDir inputDir = new DefaultInputDir(fileSystem.moduleKey(), relativePath, batchIdGenerator.get());
-    inputDir.setModuleBaseDir(fileSystem.baseDirPath());
-    fileSystem.add(inputDir);
+    DefaultInputDir inputDir = (DefaultInputDir) componentStore.getDir(module.key(), relativePath);
+    if (inputDir == null) {
+      inputDir = new DefaultInputDir(fileSystem.moduleKey(), relativePath, batchIdGenerator.get());
+      inputDir.setModuleBaseDir(fileSystem.baseDirPath());
+      fileSystem.add(inputDir);
+      componentTree.index(inputDir, module);
+    }
     componentTree.index(inputFile, inputDir);
-    componentTree.index(inputDir, module);
   }
 
   private boolean accept(InputFile indexedFile) {
