@@ -152,7 +152,6 @@ import org.sonar.server.qualityprofile.QProfiles;
 import org.sonar.server.qualityprofile.RuleActivator;
 import org.sonar.server.qualityprofile.RuleActivatorContextFactory;
 import org.sonar.server.qualityprofile.index.ActiveRuleIndexer;
-import org.sonar.server.qualityprofile.ws.OldRestoreAction;
 import org.sonar.server.qualityprofile.ws.ProfilesWs;
 import org.sonar.server.qualityprofile.ws.QProfilesWsModule;
 import org.sonar.server.qualityprofile.ws.SearchDataLoader;
@@ -190,9 +189,9 @@ import org.sonar.server.test.index.TestIndexer;
 import org.sonar.server.test.ws.CoveredFilesAction;
 import org.sonar.server.test.ws.TestsWs;
 import org.sonar.server.text.MacroInterpreter;
+import org.sonar.server.ui.DeprecatedViews;
 import org.sonar.server.ui.PageDecorations;
 import org.sonar.server.ui.PageRepository;
-import org.sonar.server.ui.DeprecatedViews;
 import org.sonar.server.ui.ws.NavigationWsModule;
 import org.sonar.server.updatecenter.UpdateCenterModule;
 import org.sonar.server.user.DefaultUserFinder;
@@ -264,7 +263,6 @@ public class PlatformLevel4 extends PlatformLevel {
       QProfileComparison.class,
       SearchDataLoader.class,
       ProfilesWs.class,
-      OldRestoreAction.class,
       RuleActivator.class,
       QProfileLoader.class,
       QProfileExporters.class,

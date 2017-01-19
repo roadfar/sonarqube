@@ -31,19 +31,12 @@ public class ProfilesWs implements WebService {
 
   public static final String API_ENDPOINT = "api/profiles";
 
-  private final OldRestoreAction restoreAction;
-
-  public ProfilesWs(OldRestoreAction restoreAction) {
-    this.restoreAction = restoreAction;
-  }
-
   @Override
   public void define(Context context) {
     NewController controller = context.createController(API_ENDPOINT)
       .setDescription("Manage quality profiles. Deprecated since 5.2.<br/>" +
         "Removed since 6.3")
       .setSince("4.4");
-    restoreAction.define(controller);
     defineListAction(controller);
     defineIndexAction(controller);
     controller.done();
